@@ -18,6 +18,10 @@ class UsersTableSeeder extends Seeder
     public function run()
     {
         DB::table('users')->delete();
+        // Disable foreign key checks temporarily
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('users')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $this->createNewUsers();
         //$this->createManyUsers( 3);
@@ -30,8 +34,8 @@ class UsersTableSeeder extends Seeder
         $d = [
 
             ['name' => 'Admin',
-                'email' => 'admin@admin@st-joans.com',
-                'username' => 'Admin',
+                'email' => 'admin@st-joans.com',
+                'username' => 'superAdmin',
                 'password' => $password,
                 'user_type' => 'super_admin',
                 'code' => strtoupper(Str::random(10)),
