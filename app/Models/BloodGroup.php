@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Eloquent;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class BloodGroup extends Eloquent
+class BloodGroup extends Model
 {
-    //
+    use HasFactory;
 }

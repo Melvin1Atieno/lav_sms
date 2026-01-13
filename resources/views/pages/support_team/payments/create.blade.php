@@ -56,6 +56,17 @@
                             </div>
                         </div>
 
+                        <div class="form-group row">
+                            <label for="year" class="col-lg-3 col-form-label font-weight-semibold">Academic Year <span class="text-danger">*</span></label>
+                            <div class="col-lg-9">
+                                <select class="form-control select-search" name="year" id="year" required>
+                                    @foreach($years as $yr)
+                                        <option {{ (old('year', $current_year) == $yr) ? 'selected' : '' }} value="{{ $yr }}">{{ $yr }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="text-right">
                             <button type="submit" class="btn btn-primary">Submit form <i class="icon-paperplane ml-2"></i></button>
                         </div>

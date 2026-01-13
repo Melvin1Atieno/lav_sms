@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
-use Eloquent;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class TimeTable extends Eloquent
+class TimeTable extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['ttr_id', 'ts_id', 'exam_date', 'day', 'timestamp_from', 'timestamp_to', 'subject_id',];
 
     public function time_slot()

@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use App\User;
-use Eloquent;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Pin extends Eloquent
+class Pin extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['code', 'user_id', 'student_id', 'times_used', 'used'];
 
     public function user($foreign = NULL)
@@ -18,5 +21,4 @@ class Pin extends Eloquent
     {
         return $this->user('student_id');
     }
-
 }

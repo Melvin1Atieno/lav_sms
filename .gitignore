@@ -15,4 +15,6 @@ _ide_helper.php
 storage
 .phpstorm.meta.php
 .editorconfig
+github
+github.pub
 **/*:Zone.Identifier

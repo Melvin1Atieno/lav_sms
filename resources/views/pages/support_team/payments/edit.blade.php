@@ -48,6 +48,14 @@
                             </div>
                         </div>
 
+                        <div class="form-group row">
+                            <label for="year" class="col-lg-3 col-form-label font-weight-semibold">Academic Year</label>
+                            <div class="col-lg-9">
+                                <input class="form-control" value="{{ $payment->year }}" disabled type="text">
+                                <small class="form-text text-muted">Year cannot be changed after payment is created</small>
+                            </div>
+                        </div>
+
                         <div class="text-right">
                             <button type="submit" class="btn btn-primary">Submit form <i class="icon-paperplane ml-2"></i></button>
                         </div>

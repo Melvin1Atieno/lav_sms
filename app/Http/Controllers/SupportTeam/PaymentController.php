@@ -33,7 +33,9 @@ class PaymentController extends Controller
     public function index()
     {
         $d['selected'] = false;
-        $d['years'] = $this->pay->getPaymentYears();
+        $d['years'] = collect($this->pay->getAvailableYears())->map(function($year) {
+            return (object)['year' => $year];
+        });
 
         return view('pages.support_team.payments.index', $d);
     }
@@ -42,13 +44,12 @@ class PaymentController extends Controller
     {
         $d['payments'] = $p = $this->pay->getPayment(['year' => $year])->get();
 
-        if(($p->count() < 1)){
-            return Qs::goWithDanger('payments.index');
-        }
-
+        // Allow viewing even if no payments exist yet (for creating new payments)
         $d['selected'] = true;
         $d['my_classes'] = $this->my_class->all();
-        $d['years'] = $this->pay->getPaymentYears();
+        $d['years'] = collect($this->pay->getAvailableYears())->map(function($yr) {
+            return (object)['year' => $yr];
+        });
         $d['year'] = $year;
 
         return view('pages.support_team.payments.index', $d);
@@ -60,9 +61,12 @@ class PaymentController extends Controller
         return Qs::goToRoute(['payments.show', $req->year]);
     }
 
-    public function create()
+    public function create(Request $req = NULL)
     {
         $d['my_classes'] = $this->my_class->all();
+        $d['years'] = $this->pay->getAvailableYears();
+        // Allow pre-selecting year from query parameter
+        $d['current_year'] = $req->year ?? $this->year;
         return view('pages.support_team.payments.create', $d);
     }
 
@@ -153,18 +157,22 @@ class PaymentController extends Controller
         return Qs::jsonUpdateOk();
     }
 
-    public function manage($class_id = NULL)
+    public function manage($class_id = NULL, Request $req = NULL)
     {
         $d['my_classes'] = $this->my_class->all();
         $d['selected'] = false;
+        $d['years'] = $this->pay->getAvailableYears();
+        $d['current_year'] = $this->year;
 
         if($class_id){
+            $selectedYear = $req->year ?? $this->year;
             $d['students'] = $st = $this->student->getRecord(['my_class_id' => $class_id])->get()->sortBy('user.name');
             if($st->count() < 1){
                 return Qs::goWithDanger('payments.manage');
             }
             $d['selected'] = true;
             $d['my_class_id'] = $class_id;
+            $d['selected_year'] = $selectedYear;
         }
 
         return view('pages.support_team.payments.manage', $d);
@@ -173,13 +181,18 @@ class PaymentController extends Controller
     public function select_class(Request $req)
     {
         $this->validate($req, [
-            'my_class_id' => 'required|exists:my_classes,id'
-        ], [], ['my_class_id' => 'Class']);
+            'my_class_id' => 'required|exists:my_classes,id',
+            'year' => 'required|string'
+        ], [], [
+            'my_class_id' => 'Class',
+            'year' => 'Academic Year'
+        ]);
 
         $wh['my_class_id'] = $class_id = $req->my_class_id;
+        $selectedYear = $req->year ?? $this->year;
 
-        $pay1 = $this->pay->getPayment(['my_class_id' => $class_id, 'year' => $this->year])->get();
-        $pay2 = $this->pay->getGeneralPayment(['year' => $this->year])->get();
+        $pay1 = $this->pay->getPayment(['my_class_id' => $class_id, 'year' => $selectedYear])->get();
+        $pay2 = $this->pay->getGeneralPayment(['year' => $selectedYear])->get();
         $payments = $pay2->count() ? $pay1->merge($pay2) : $pay1;
         $students = $this->student->getRecord($wh)->get();
 
@@ -188,7 +201,7 @@ class PaymentController extends Controller
                 foreach($students as $st){
                     $pr['student_id'] = $st->user_id;
                     $pr['payment_id'] = $p->id;
-                    $pr['year'] = $this->year;
+                    $pr['year'] = $selectedYear;
                     $rec = $this->pay->createRecord($pr);
                     $rec->ref_no ?: $rec->update(['ref_no' => mt_rand(100000, 99999999)]);
 
@@ -202,7 +215,8 @@ class PaymentController extends Controller
     public function store(PaymentCreate $req)
     {
         $data = $req->all();
-        $data['year'] = $this->year;
+        // Use year from request, fallback to current session if not provided
+        $data['year'] = $req->year ?? $this->year;
         $data['ref_no'] = Pay::genRefCode();
         $this->pay->create($data);
 

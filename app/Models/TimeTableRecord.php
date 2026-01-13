@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
-use Eloquent;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class TimeTableRecord extends Eloquent
+class TimeTableRecord extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['name', 'my_class_id', 'exam_id', 'year'];
 
     public function my_class()

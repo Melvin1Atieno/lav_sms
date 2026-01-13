@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
-use Eloquent;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class UserType extends Eloquent
+class UserType extends Model
 {
-    //
+    use HasFactory;
 }

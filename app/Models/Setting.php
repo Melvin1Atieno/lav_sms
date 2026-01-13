@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
-use Eloquent;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Setting extends Eloquent
+class Setting extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['type', 'description'];
 }

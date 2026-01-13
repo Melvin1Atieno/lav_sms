@@ -32,7 +32,40 @@ class PaymentRepo
 
     public function getPaymentYears()
     {
-        return Payment::select('year')->distinct()->get();
+        return Payment::select('year')->distinct()->orderBy('year', 'desc')->get();
+    }
+
+    public function getAvailableYears()
+    {
+        // Get existing payment years
+        $existingYears = Payment::select('year')->distinct()->pluck('year')->toArray();
+        
+        // Get current session year
+        $currentYear = Qs::getCurrentSession();
+        
+        // Generate years from 5 years ago to 5 years ahead (10 year range)
+        $currentYearNum = (int) date('Y');
+        $years = [];
+        
+        for ($i = -5; $i <= 5; $i++) {
+            $year = $currentYearNum + $i;
+            $nextYear = $year + 1;
+            $academicYear = "{$year}-{$nextYear}";
+            $years[] = $academicYear;
+        }
+        
+        // Add any existing years that are outside the range
+        foreach ($existingYears as $existingYear) {
+            if (!in_array($existingYear, $years)) {
+                $years[] = $existingYear;
+            }
+        }
+        
+        // Remove duplicates and sort descending
+        $years = array_unique($years);
+        rsort($years);
+        
+        return $years;
     }
 
     public function find($id)

@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
-use Eloquent;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class MyClass extends Eloquent
+class MyClass extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['name', 'class_type_id'];
 
     public function section()

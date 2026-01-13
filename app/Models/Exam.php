@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
-use Eloquent;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Exam extends Eloquent
+class Exam extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['name', 'term', 'year'];
 }

@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use App\User;
-use Eloquent;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class PaymentRecord extends Eloquent
+class PaymentRecord extends Model
 {
+    use HasFactory;
+
     protected $fillable =['student_id', 'payment_id', 'amt_paid', 'year', 'paid', 'balance', 'ref_no'];
 
     public function payment()

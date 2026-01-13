@@ -2,11 +2,11 @@
 
 namespace App;
 
+use App\Models\Area;
 use App\Models\BloodGroup;
-use App\Models\Lga;
+use App\Models\County;
 use App\Models\Nationality;
 use App\Models\StaffRecord;
-use App\Models\State;
 use App\Models\StudentRecord;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
@@ -42,12 +42,12 @@ class User extends Authenticatable
 
     public function lga()
     {
-        return $this->belongsTo(Lga::class);
+        return $this->belongsTo(Area::class, 'lga_id');
     }
 
     public function state()
     {
-        return $this->belongsTo(State::class);
+        return $this->belongsTo(County::class, 'state_id');
     }
 
     public function nationality()

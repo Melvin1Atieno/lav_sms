@@ -43,7 +43,12 @@
     <div class="card">
         <div class="card-header header-elements-inline">
             <h6 class="card-title">Manage Payments for {{ $year }} Session</h6>
-            {!! Qs::getPanelOptions() !!}
+            <div class="header-elements">
+                <a href="{{ route('payments.create') }}?year={{ $year }}" class="btn btn-primary btn-sm">
+                    <i class="icon-plus-circle2 mr-2"></i> Create Payment for {{ $year }}
+                </a>
+                {!! Qs::getPanelOptions() !!}
+            </div>
         </div>
 
         <div class="card-body">

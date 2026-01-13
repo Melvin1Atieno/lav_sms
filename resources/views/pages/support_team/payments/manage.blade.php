@@ -11,15 +11,27 @@
             <form method="post" action="{{ route('payments.select_class') }}">
                 @csrf
               <div class="row">
-                  <div class="col-md-6 offset-md-3">
+                  <div class="col-md-8 offset-md-2">
                       <div class="row">
-                          <div class="col-md-10">
+                          <div class="col-md-5">
                               <div class="form-group">
                                   <label for="my_class_id" class="col-form-label font-weight-bold">Class:</label>
                                   <select required id="my_class_id" name="my_class_id" class="form-control select">
                                       <option value="">Select Class</option>
                                       @foreach($my_classes as $c)
-                                          <option {{ ($selected && $my_class_id == $c->id) ? 'selected' : '' }} value="{{ $c->id }}">{{ $c->name }}</option>
+                                          <option {{ ($selected && isset($my_class_id) && $my_class_id == $c->id) ? 'selected' : '' }} value="{{ $c->id }}">{{ $c->name }}</option>
+                                      @endforeach
+                                  </select>
+                              </div>
+                          </div>
+
+                          <div class="col-md-5">
+                              <div class="form-group">
+                                  <label for="year" class="col-form-label font-weight-bold">Academic Year:</label>
+                                  <select required id="year" name="year" class="form-control select">
+                                      <option value="">Select Year</option>
+                                      @foreach($years as $yr)
+                                          <option {{ (isset($selected_year) && $selected_year == $yr) || (!isset($selected_year) && $current_year == $yr) ? 'selected' : '' }} value="{{ $yr }}">{{ $yr }}</option>
                                       @endforeach
                                   </select>
                               </div>
@@ -64,8 +76,11 @@
                                     </a>
                             <div class="dropdown-menu dropdown-menu-left">
                                 <a href="{{ route('payments.invoice', [Qs::hash($s->user_id)]) }}" class="dropdown-item">All Payments</a>
+                                @if(isset($selected_year))
+                                    <a href="{{ route('payments.invoice', [Qs::hash($s->user_id), $selected_year]) }}" class="dropdown-item">{{ $selected_year }}</a>
+                                @endif
                                 @foreach(Pay::getYears($s->user_id) as $py)
-                                @if($py)
+                                @if($py && (!isset($selected_year) || $py != $selected_year))
                                     <a href="{{ route('payments.invoice', [Qs::hash($s->user_id), $py]) }}" class="dropdown-item">{{ $py }}</a>
                                 @endif
                                 @endforeach

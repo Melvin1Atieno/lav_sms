@@ -2,9 +2,12 @@
 
 namespace App\Models;
 
-use Eloquent;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Skill extends Eloquent
+class Skill extends Model
 {
+    use HasFactory;
+
     //protected  $fillable = ['name', 'skill_type', 'class_type'];
 }
