@@ -79,7 +79,7 @@
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $p->title }}</td>
-                                    <td>{{ $p->amount }}</td>
+                                    <td>KSh {{ number_format($p->amount, 2) }}</td>
                                     <td>{{ $p->ref_no }}</td>
                                     <td>{{ $p->my_class_id ? $p->my_class->name : '' }}</td>
                                     <td>{{ ucwords($p->method) }}</td>
@@ -128,7 +128,7 @@
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
                                     <td>{{ $p->title }}</td>
-                                    <td>{{ $p->amount }}</td>
+                                    <td>KSh {{ number_format($p->amount, 2) }}</td>
                                     <td>{{ $p->ref_no }}</td>
                                     <td>{{ $p->my_class_id ? $p->my_class->name : '' }}</td>
                                     <td>{{ ucwords($p->method) }}</td>

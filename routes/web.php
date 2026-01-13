@@ -28,6 +28,8 @@ Route::group(['middleware' => 'auth'], function () {
             Route::get('graduated', 'StudentRecordController@graduated')->name('students.graduated');
             Route::put('not_graduated/{id}', 'StudentRecordController@not_graduated')->name('st.not_graduated');
             Route::get('list/{class_id}', 'StudentRecordController@listByClass')->name('students.list')->middleware('teamSAT');
+            Route::get('generate-admission-doc/{sr_id}', 'StudentRecordController@generateAdmissionDocument')->name('students.generate_admission_doc');
+            Route::get('generate-fee-balance/{sr_id}', 'StudentRecordController@generateFeeBalanceForm')->name('students.generate_fee_balance');
 
             /* Promotions */
             Route::post('promote_selector', 'PromotionController@selector')->name('students.promote_selector');
@@ -142,7 +144,6 @@ Route::group(['middleware' => 'auth'], function () {
         Route::resource('subjects', 'SubjectController');
         Route::resource('grades', 'GradeController');
         Route::resource('exams', 'ExamController');
-        Route::resource('dorms', 'DormController');
         Route::resource('payments', 'PaymentController');
 
     });

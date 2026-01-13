@@ -169,16 +169,21 @@
         var input = $('#val-'+form_id);
 
         // Get Values
-        var amt = parseInt(td_amt.data('amount'));
-        var amt_paid = parseInt(td_amt_paid.data('amount'));
-        var amt_input = parseInt(input.val());
+        var amt = parseFloat(td_amt.data('amount'));
+        var amt_paid = parseFloat(td_amt_paid.data('amount')) || 0;
+        var amt_input = parseFloat(input.val());
 
 //        Update Values
         amt_paid = amt_paid + amt_input;
         var bal = amt - amt_paid;
 
-        td_bal.text(''+bal);
-        td_amt_paid.text(''+amt_paid).data('amount', ''+amt_paid);
+        // Format with KSh and 2 decimal places
+        function formatCurrency(amount) {
+            return 'KSh ' + parseFloat(amount).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        td_bal.text(formatCurrency(bal));
+        td_amt_paid.text(formatCurrency(amt_paid)).data('amount', amt_paid);
         input.attr('max', bal);
         bal < 1 ? $('#'+form_id).fadeOut('slow').remove() : '';
     });

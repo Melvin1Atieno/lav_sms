@@ -1,215 +1,404 @@
 @extends('layouts.master')
 @section('page_title', 'Admit Student')
 @section('content')
-        <div class="card">
-            <div class="card-header bg-white header-elements-inline">
-                <h6 class="card-title">Please fill The form Below To Admit A New Student</h6>
+<style>
+    .camera-btn {
+        margin-top: 5px;
+    }
+    .parent-section {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+    }
+</style>
+<div class="card">
+    <div class="card-header bg-white header-elements-inline">
+        <h6 class="card-title">Please fill The form Below To Admit A New Student</h6>
+        {!! Qs::getPanelOptions() !!}
+    </div>
 
-                {!! Qs::getPanelOptions() !!}
+    <form id="ajax-reg" method="post" enctype="multipart/form-data" class="wizard-form steps-validation" action="{{ route('students.store') }}" data-fouc>
+        @csrf
+        
+        <!-- Student Information -->
+        <h6>Student Information</h6>
+        <fieldset>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>First Name: <span class="text-danger">*</span></label>
+                        <input value="{{ old('first_name') }}" required type="text" name="first_name" placeholder="First Name" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Last Name: <span class="text-danger">*</span></label>
+                        <input value="{{ old('last_name') }}" required type="text" name="last_name" placeholder="Last Name" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Surname: <span class="text-danger">*</span></label>
+                        <input value="{{ old('surname') }}" required type="text" name="surname" placeholder="Surname" class="form-control">
+                    </div>
+                </div>
             </div>
 
-            <form id="ajax-reg" method="post" enctype="multipart/form-data" class="wizard-form steps-validation" action="{{ route('students.store') }}" data-fouc>
-               @csrf
-                <h6>Personal data</h6>
-                <fieldset>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Full Name: <span class="text-danger">*</span></label>
-                                <input value="{{ old('name') }}" required type="text" name="name" placeholder="Full Name" class="form-control">
-                                </div>
-                            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Date of Birth: <span class="text-danger">*</span></label>
+                        <input name="dob" value="{{ old('dob') }}" type="text" class="form-control date-pick" placeholder="Select Date..." required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label for="gender">Gender: <span class="text-danger">*</span></label>
+                        <select class="select form-control" id="gender" name="gender" required data-fouc data-placeholder="Choose..">
+                            <option value=""></option>
+                            <option {{ (old('gender') == 'Male') ? 'selected' : '' }} value="Male">Male</option>
+                            <option {{ (old('gender') == 'Female') ? 'selected' : '' }} value="Female">Female</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
 
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Address: <span class="text-danger">*</span></label>
-                                <input value="{{ old('address') }}" class="form-control" placeholder="Address" name="address" type="text" required>
-                            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="my_class_id">Grade: <span class="text-danger">*</span></label>
+                        <select data-placeholder="Choose..." required name="my_class_id" id="my_class_id" class="select-search form-control">
+                            <option value=""></option>
+                            @foreach($my_classes as $c)
+                                <option {{ (old('my_class_id') == $c->id ? 'selected' : '') }} value="{{ $c->id }}">{{ $c->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="d-block">Student Photo: <span class="text-danger">*</span></label>
+                        <input id="photo-input" accept="image/*" type="file" name="photo" class="form-input-styled" data-fouc>
+                        <button type="button" class="btn btn-sm btn-primary camera-btn" onclick="capturePhoto()">
+                            <i class="icon-camera"></i> Take Photo
+                        </button>
+                        <video id="video" style="display:none; width:100%; max-width:300px; margin-top:10px;"></video>
+                        <canvas id="canvas" style="display:none;"></canvas>
+                        <span class="form-text text-muted">Accepted Images: jpeg, png. Max file size 2Mb</span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>NEMIS Number: </label>
+                        <input value="{{ old('nemis_number') }}" type="text" name="nemis_number" placeholder="NEMIS Number (Optional)" class="form-control">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Previous School: </label>
+                        <input value="{{ old('previous_school') }}" type="text" name="previous_school" placeholder="Previous School" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="d-block">Birth Certificate: </label>
+                        <input id="birth-cert-input" accept="image/*,.pdf" type="file" name="birth_certificate" class="form-input-styled" data-fouc>
+                        <button type="button" class="btn btn-sm btn-primary camera-btn" onclick="captureBirthCert()">
+                            <i class="icon-camera"></i> Take Photo
+                        </button>
+                        <span class="form-text text-muted">Upload document or take photo</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="d-block">Paid Admission Fee: </label>
+                        <div class="form-check">
+                            <input type="checkbox" name="admission_fee_paid" value="1" class="form-check-input" id="admission_fee_paid" {{ old('admission_fee_paid') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="admission_fee_paid">
+                                Check if admission fee has been paid (if not checked, it will be included in fees)
+                            </label>
                         </div>
                     </div>
+                </div>
+            </div>
+        </fieldset>
 
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Email address: </label>
-                                <input type="email" value="{{ old('email') }}" name="email" class="form-control" placeholder="Email Address">
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="gender">Gender: <span class="text-danger">*</span></label>
-                                <select class="select form-control" id="gender" name="gender" required data-fouc data-placeholder="Choose..">
-                                    <option value=""></option>
-                                    <option {{ (old('gender') == 'Male') ? 'selected' : '' }} value="Male">Male</option>
-                                    <option {{ (old('gender') == 'Female') ? 'selected' : '' }} value="Female">Female</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Phone:</label>
-                                <input value="{{ old('phone') }}" type="text" name="phone" class="form-control" placeholder="" >
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Telephone:</label>
-                                <input value="{{ old('phone2') }}" type="text" name="phone2" class="form-control" placeholder="" >
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Date of Birth:</label>
-                                <input name="dob" value="{{ old('dob') }}" type="text" class="form-control date-pick" placeholder="Select Date...">
-
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="nal_id">Nationality: <span class="text-danger">*</span></label>
-                                <select data-placeholder="Choose..." required name="nal_id" id="nal_id" class="select-search form-control">
-                                    <option value=""></option>
-                                    @foreach($nationals as $nal)
-                                        <option {{ (old('nal_id') == $nal->id ? 'selected' : '') }} value="{{ $nal->id }}">{{ $nal->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label for="state_id">State: <span class="text-danger">*</span></label>
-                            <select onchange="getLGA(this.value)" required data-placeholder="Choose.." class="select-search form-control" name="state_id" id="state_id">
-                                <option value=""></option>
-                                @foreach($states as $st)
-                                    <option {{ (old('state_id') == $st->id ? 'selected' : '') }} value="{{ $st->id }}">{{ $st->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-md-3">
-                            <label for="lga_id">LGA: <span class="text-danger">*</span></label>
-                            <select required data-placeholder="Select State First" class="select-search form-control" name="lga_id" id="lga_id">
-                                <option value=""></option>
-                            </select>
+        <!-- Parent/Guardian Information -->
+        <h6>Parent/Guardian Information (At least one required)</h6>
+        <fieldset>
+            <!-- Father -->
+            <div class="parent-section">
+                <h6>Father</h6>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>First Name: </label>
+                            <input value="{{ old('father_first_name') }}" type="text" name="father_first_name" placeholder="First Name" class="form-control">
                         </div>
                     </div>
-                    <div class="row">
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="bg_id">Blood Group: </label>
-                                <select class="select form-control" id="bg_id" name="bg_id" data-fouc data-placeholder="Choose..">
-                                    <option value=""></option>
-                                    @foreach(App\Models\BloodGroup::all() as $bg)
-                                        <option {{ (old('bg_id') == $bg->id ? 'selected' : '') }} value="{{ $bg->id }}">{{ $bg->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label class="d-block">Upload Passport Photo:</label>
-                                <input value="{{ old('photo') }}" accept="image/*" type="file" name="photo" class="form-input-styled" data-fouc>
-                                <span class="form-text text-muted">Accepted Images: jpeg, png. Max file size 2Mb</span>
-                            </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Last Name: </label>
+                            <input value="{{ old('father_last_name') }}" type="text" name="father_last_name" placeholder="Last Name" class="form-control">
                         </div>
                     </div>
-
-                </fieldset>
-
-                <h6>Student Data</h6>
-                <fieldset>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="my_class_id">Class: <span class="text-danger">*</span></label>
-                                <select onchange="getClassSections(this.value)" data-placeholder="Choose..." required name="my_class_id" id="my_class_id" class="select-search form-control">
-                                    <option value=""></option>
-                                    @foreach($my_classes as $c)
-                                        <option {{ (old('my_class_id') == $c->id ? 'selected' : '') }} value="{{ $c->id }}">{{ $c->name }}</option>
-                                        @endforeach
-                                </select>
-                        </div>
-                            </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="section_id">Section: <span class="text-danger">*</span></label>
-                                <select data-placeholder="Select Class First" required name="section_id" id="section_id" class="select-search form-control">
-                                    <option {{ (old('section_id')) ? 'selected' : '' }} value="{{ old('section_id') }}">{{ (old('section_id')) ? 'Selected' : '' }}</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="my_parent_id">Parent: </label>
-                                <select data-placeholder="Choose..."  name="my_parent_id" id="my_parent_id" class="select-search form-control">
-                                    <option  value=""></option>
-                                    @foreach($parents as $p)
-                                        <option {{ (old('my_parent_id') == Qs::hash($p->id)) ? 'selected' : '' }} value="{{ Qs::hash($p->id) }}">{{ $p->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="year_admitted">Year Admitted: <span class="text-danger">*</span></label>
-                                <select data-placeholder="Choose..." required name="year_admitted" id="year_admitted" class="select-search form-control">
-                                    <option value=""></option>
-                                    @for($y=date('Y', strtotime('- 10 years')); $y<=date('Y'); $y++)
-                                        <option {{ (old('year_admitted') == $y) ? 'selected' : '' }} value="{{ $y }}">{{ $y }}</option>
-                                    @endfor
-                                </select>
-                            </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>ID Number: </label>
+                            <input value="{{ old('father_id_number') }}" type="text" name="father_id_number" placeholder="ID Number" class="form-control">
                         </div>
                     </div>
-
-                    <div class="row">
-                        <div class="col-md-3">
-                            <label for="dorm_id">Dormitory: </label>
-                            <select data-placeholder="Choose..."  name="dorm_id" id="dorm_id" class="select-search form-control">
-                                <option value=""></option>
-                                @foreach($dorms as $d)
-                                    <option {{ (old('dorm_id') == $d->id) ? 'selected' : '' }} value="{{ $d->id }}">{{ $d->name }}</option>
-                                    @endforeach
-                            </select>
-
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Dormitory Room No:</label>
-                                <input type="text" name="dorm_room_no" placeholder="Dormitory Room No" class="form-control" value="{{ old('dorm_room_no') }}">
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Sport House:</label>
-                                <input type="text" name="house" placeholder="Sport House" class="form-control" value="{{ old('house') }}">
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label>Admission Number:</label>
-                                <input type="text" name="adm_no" placeholder="Admission Number" class="form-control" value="{{ old('adm_no') }}">
-                            </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Phone Number: </label>
+                            <input value="{{ old('father_phone_number') }}" type="text" name="father_phone_number" placeholder="Phone Number" class="form-control">
                         </div>
                     </div>
-                </fieldset>
+                </div>
+            </div>
 
-            </form>
-        </div>
-    @endsection
+            <!-- Mother -->
+            <div class="parent-section">
+                <h6>Mother</h6>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>First Name: </label>
+                            <input value="{{ old('mother_first_name') }}" type="text" name="mother_first_name" placeholder="First Name" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Last Name: </label>
+                            <input value="{{ old('mother_last_name') }}" type="text" name="mother_last_name" placeholder="Last Name" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>ID Number: </label>
+                            <input value="{{ old('mother_id_number') }}" type="text" name="mother_id_number" placeholder="ID Number" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Phone Number: </label>
+                            <input value="{{ old('mother_phone_number') }}" type="text" name="mother_phone_number" placeholder="Phone Number" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guardian/Alternative Contact -->
+            <div class="parent-section">
+                <h6>Guardian/Alternative Contact</h6>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>First Name: </label>
+                            <input value="{{ old('guardian_first_name') }}" type="text" name="guardian_first_name" placeholder="First Name" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Last Name: </label>
+                            <input value="{{ old('guardian_last_name') }}" type="text" name="guardian_last_name" placeholder="Last Name" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>ID Number: </label>
+                            <input value="{{ old('guardian_id_number') }}" type="text" name="guardian_id_number" placeholder="ID Number" class="form-control">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Phone Number: </label>
+                            <input value="{{ old('guardian_phone_number') }}" type="text" name="guardian_phone_number" placeholder="Phone Number" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+
+        <!-- Action Buttons -->
+        <h6>Actions</h6>
+        <fieldset>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">Save Student</button>
+                        <button type="button" class="btn btn-success" id="generate-admission-doc" style="display:none;">Generate Admission Document</button>
+                        <button type="button" class="btn btn-info" id="generate-fee-balance" style="display:none;">Generate Fee Balance Form</button>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+</div>
+
+<script>
+let stream = null;
+
+function capturePhoto() {
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const photoInput = document.getElementById('photo-input');
+    
+    if (stream) {
+        // Stop existing stream
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+        video.style.display = 'none';
+        return;
+    }
+    
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(mediaStream) {
+            stream = mediaStream;
+            video.srcObject = mediaStream;
+            video.style.display = 'block';
+            video.play();
+            
+            // Add capture button
+            const captureBtn = document.createElement('button');
+            captureBtn.type = 'button';
+            captureBtn.className = 'btn btn-sm btn-success';
+            captureBtn.textContent = 'Capture';
+            captureBtn.onclick = function() {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                
+                canvas.toBlob(function(blob) {
+                    const file = new File([blob], 'photo.jpg', { type: 'image/jpeg' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    photoInput.files = dataTransfer.files;
+                    
+                    stream.getTracks().forEach(track => track.stop());
+                    stream = null;
+                    video.style.display = 'none';
+                    captureBtn.remove();
+                }, 'image/jpeg');
+            };
+            document.querySelector('.camera-btn').after(captureBtn);
+        })
+        .catch(function(err) {
+            alert('Error accessing camera: ' + err.message);
+        });
+}
+
+function captureBirthCert() {
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const birthCertInput = document.getElementById('birth-cert-input');
+    
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+        video.style.display = 'none';
+        return;
+    }
+    
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(function(mediaStream) {
+            stream = mediaStream;
+            video.srcObject = mediaStream;
+            video.style.display = 'block';
+            video.play();
+            
+            const captureBtn = document.createElement('button');
+            captureBtn.type = 'button';
+            captureBtn.className = 'btn btn-sm btn-success';
+            captureBtn.textContent = 'Capture';
+            captureBtn.onclick = function() {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                
+                canvas.toBlob(function(blob) {
+                    const file = new File([blob], 'birth_certificate.jpg', { type: 'image/jpeg' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+                    birthCertInput.files = dataTransfer.files;
+                    
+                    stream.getTracks().forEach(track => track.stop());
+                    stream = null;
+                    video.style.display = 'none';
+                    captureBtn.remove();
+                }, 'image/jpeg');
+            };
+            document.querySelectorAll('.camera-btn')[1].after(captureBtn);
+        })
+        .catch(function(err) {
+            alert('Error accessing camera: ' + err.message);
+        });
+}
+
+// Override the default submitForm success handler for this form
+$(document).ready(function() {
+    $('form#ajax-reg').on('submit', function(ev){
+        ev.preventDefault();
+        var form = $(this);
+        var btn = form.find('button[type=submit]');
+        disableBtn(btn);
+        
+        var ajaxOptions = {
+            url: form.attr('action'),
+            type: 'POST',
+            cache: false,
+            processData: false,
+            dataType: 'json',
+            contentType: false,
+            data: new FormData(form[0])
+        };
+        
+        var req = $.ajax(ajaxOptions);
+        req.done(function(resp){
+            if(resp.status == 'success' && resp.student_record_id) {
+                flash({msg: resp.message || 'Student admitted successfully!', type: 'success'});
+                
+                // Redirect to student profile after a short delay
+                if(resp.redirect_url) {
+                    setTimeout(function() {
+                        window.location.href = resp.redirect_url;
+                    }, 1000);
+                } else {
+                    // Fallback: redirect using student_record_id
+                    setTimeout(function() {
+                        window.location.href = '{{ url("students") }}/' + resp.student_record_id;
+                    }, 1000);
+                }
+            } else {
+                resp.ok && resp.msg
+                    ? flash({msg: resp.msg, type: 'success'})
+                    : flash({msg: resp.msg || 'Error occurred', type: 'danger'});
+                enableBtn(btn);
+                scrollTo('body');
+            }
+        });
+        
+        req.fail(function(e){
+            if (e.status == 422){
+                var errors = e.responseJSON.errors;
+                displayAjaxErr(errors);
+            }
+            if(e.status == 500){
+                displayAjaxErr([e.status + ' ' + e.statusText + ' Please Check for Duplicate entry or Contact School Administrator/IT Personnel']);
+            }
+            enableBtn(btn);
+        });
+    });
+});
+</script>
+@endsection

@@ -13,12 +13,23 @@ class AreaTableSeeder extends Seeder
     {
         DB::table('areas')->delete();
 
-        $county_id = [1, 1, 1];
+        // Get Kajiado County ID dynamically
+        $kajiadoCounty = \App\Models\County::where('name', 'Kajiado')->first();
+        
+        if (!$kajiadoCounty) {
+            // If county doesn't exist, create it
+            $kajiadoCounty = \App\Models\County::create(['name' => 'Kajiado']);
+        }
 
-        $areas = ["Maasai Mara Estate", "Maziwa", "Maduka Ya Juu",];
+        // Kajiado County, Kajiado Central Sub-County areas
+        $areas = [
+            "Maasai Mara Estate", 
+            "Kajiado Central", 
+            "Ongata Rongai"
+        ];
 
-        for($i=0; $i<count($areas); $i++){
-            Area::create(['county_id' => $county_id[$i], 'name' => $areas[$i]]);
+        foreach ($areas as $area) {
+            Area::create(['county_id' => $kajiadoCounty->id, 'name' => $area]);
         }
     }
 
